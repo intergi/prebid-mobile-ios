@@ -56,7 +56,8 @@ class NativeInAppViewController: UIViewController, GAMBannerAdLoaderDelegate, GA
         case .renderingMoPub:
             print("TODO: Add Example")
         case .undefined:
-            assertionFailure("The integration kind is: \(integrationKind.rawValue)")
+//            assertionFailure("The integration kind is: \(integrationKind.rawValue)")
+            PBMLog.error("The integration kind is: \(integrationKind.rawValue)")
         }
     }
     

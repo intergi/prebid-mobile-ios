@@ -31,6 +31,8 @@
 		6069716C25224655000EE732 /* InstreamVideoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6069716B25224655000EE732 /* InstreamVideoViewController.swift */; };
 		609C52C32395F17F001FA5BD /* NativeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 609C52C22395F17F001FA5BD /* NativeViewController.swift */; };
 		7A5EF9716CD8081552A53A2C /* Pods_PrebidDemoSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9062CC2EEBA1A7F525A4D3AA /* Pods_PrebidDemoSwift.framework */; };
+		920E351E2754E6AC007B48EC /* TestUtils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 920E351D2754E673007B48EC /* TestUtils.framework */; };
+		920E351F2754E6B7007B48EC /* TestUtils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 920E351D2754E673007B48EC /* TestUtils.framework */; };
 		9292C6B7506986A7F501E561 /* Pods_PrebidDemoObjectiveC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 022C426932D62F4F7C3973DB /* Pods_PrebidDemoObjectiveC.framework */; };
 		FA12E4B7231EB04100CAA05B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA12E4B6231EB04100CAA05B /* AppDelegate.swift */; };
 		FA12E4BC231EB04100CAA05B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FA12E4BA231EB04100CAA05B /* Main.storyboard */; };
@@ -56,6 +58,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		920E351C2754E673007B48EC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 920E35172754E673007B48EC /* TestUtils.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = FA9E5E0D2649420C0049B214;
+			remoteInfo = TestUtils;
+		};
 		FA12E477231E9DAA00CAA05B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FA12E472231E9DAA00CAA05B /* PrebidMobile.xcodeproj */;
@@ -83,20 +92,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = FAAA00BC2322733E009DC7D6;
 			remoteInfo = PrebidMobile;
-		};
-		FA85F9D4264951FD00B8BE72 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = FA85F9D1264951FD00B8BE72 /* TestUtils.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = FA9E5E0C2649420C0049B214;
-			remoteInfo = TestUtils;
-		};
-		FA85F9D8264951FD00B8BE72 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = FA85F9D1264951FD00B8BE72 /* TestUtils.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = FA9E5E0D2649420C0049B214;
-			remoteInfo = TestUtils;
 		};
 		FAC9E218232800DB00113B04 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -173,6 +168,7 @@
 		725E7FE27DFBC5E532A78D55 /* Pods-PrebidDemoObjectiveC.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PrebidDemoObjectiveC.release.xcconfig"; path = "Target Support Files/Pods-PrebidDemoObjectiveC/Pods-PrebidDemoObjectiveC.release.xcconfig"; sourceTree = "<group>"; };
 		77A5CA8BEA1E8A52B2345013 /* Pods-PrebidDemoPodCoreTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PrebidDemoPodCoreTests.release.xcconfig"; path = "Target Support Files/Pods-PrebidDemoPodCoreTests/Pods-PrebidDemoPodCoreTests.release.xcconfig"; sourceTree = "<group>"; };
 		9062CC2EEBA1A7F525A4D3AA /* Pods_PrebidDemoSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PrebidDemoSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		920E35172754E673007B48EC /* TestUtils.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TestUtils.xcodeproj; path = ../../tools/TestUtils/TestUtils.xcodeproj; sourceTree = "<group>"; };
 		9818E214AF5A142F667B1692 /* Pods-PrebidDemoPod-PrebidDemoPodCoreTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PrebidDemoPod-PrebidDemoPodCoreTests.release.xcconfig"; path = "Target Support Files/Pods-PrebidDemoPod-PrebidDemoPodCoreTests/Pods-PrebidDemoPod-PrebidDemoPodCoreTests.release.xcconfig"; sourceTree = "<group>"; };
 		A37D8539AD93B0EDA6D8CA6F /* Pods-PrebidDemoPod-PrebidDemoPodCoreTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PrebidDemoPod-PrebidDemoPodCoreTests.debug.xcconfig"; path = "Target Support Files/Pods-PrebidDemoPod-PrebidDemoPodCoreTests/Pods-PrebidDemoPod-PrebidDemoPodCoreTests.debug.xcconfig"; sourceTree = "<group>"; };
 		B881728A2AC4EBA354CACEC3 /* Pods_PrebidDemoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PrebidDemoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -205,7 +201,6 @@
 		FA12E50E231EBC8E00CAA05B /* PrebidNavigationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrebidNavigationController.h; sourceTree = "<group>"; };
 		FA12E510231EBC8E00CAA05B /* PrebidNavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrebidNavigationController.m; sourceTree = "<group>"; };
 		FA7E552F239E87FA0063B028 /* RewardedVideoController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedVideoController.swift; sourceTree = "<group>"; };
-		FA85F9D1264951FD00B8BE72 /* TestUtils.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TestUtils.xcodeproj; path = "/Users/alex/Desktop/GL/RubiconProject/Prebid/ios/SDKPrebid/contributing.0/prebid-mobile-ios/tools/TestUtils/TestUtils.xcodeproj"; sourceTree = "<absolute>"; };
 		FAEE508F263075D700AD9966 /* XCPrebidMobile.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = XCPrebidMobile.xcframework; path = ../../generated/output/XCPrebidMobile.xcframework; sourceTree = "<group>"; };
 		FE42FA136DE4051164482E98 /* Pods-PrebidDemoPod-PrebidDemoPodTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PrebidDemoPod-PrebidDemoPodTests.release.xcconfig"; path = "Target Support Files/Pods-PrebidDemoPod-PrebidDemoPodTests/Pods-PrebidDemoPod-PrebidDemoPodTests.release.xcconfig"; sourceTree = "<group>"; };
 		FF998B08BBD628EE19A4C031 /* Pods-PrebidDemoSwiftTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PrebidDemoSwiftTests.release.xcconfig"; path = "Target Support Files/Pods-PrebidDemoSwiftTests/Pods-PrebidDemoSwiftTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -216,6 +211,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				920E351E2754E6AC007B48EC /* TestUtils.framework in Frameworks */,
 				5BA4CF70273AE27E00197C62 /* PrebidMobileMoPubAdapters.framework in Frameworks */,
 				FAC9E216232800DB00113B04 /* PrebidMobile.framework in Frameworks */,
 				7A5EF9716CD8081552A53A2C /* Pods_PrebidDemoSwift.framework in Frameworks */,
@@ -235,6 +231,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				920E351F2754E6B7007B48EC /* TestUtils.framework in Frameworks */,
 				5BD98F0F273EC0D60030ACC3 /* PrebidMobileMoPubAdapters.framework in Frameworks */,
 				FA282EAB2327EC2800C9D477 /* PrebidMobile.framework in Frameworks */,
 				9292C6B7506986A7F501E561 /* Pods_PrebidDemoObjectiveC.framework in Frameworks */,
@@ -304,6 +301,14 @@
 			path = RenderingVC;
 			sourceTree = "<group>";
 		};
+		920E35182754E673007B48EC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				920E351D2754E673007B48EC /* TestUtils.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		99D7F73A394177471348CDD1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -322,6 +327,7 @@
 		FA12E452231E9C5900CAA05B = {
 			isa = PBXGroup;
 			children = (
+				920E35172754E673007B48EC /* TestUtils.xcodeproj */,
 				FA12E472231E9DAA00CAA05B /* PrebidMobile.xcodeproj */,
 				FA12E4B5231EB04100CAA05B /* PrebidDemoSwift */,
 				FA12E4F7231EB99D00CAA05B /* PrebidDemoObjectiveC */,
@@ -329,7 +335,6 @@
 				FA12E45C231E9C5900CAA05B /* Products */,
 				464FE826217632CAB58ABF2E /* Pods */,
 				99D7F73A394177471348CDD1 /* Frameworks */,
-				FA85F9D1264951FD00B8BE72 /* TestUtils.xcodeproj */,
 			);
 			sourceTree = "<group>";
 		};
@@ -405,14 +410,6 @@
 			path = PrebidDemoObjectiveC;
 			sourceTree = "<group>";
 		};
-		FA85F9D2264951FD00B8BE72 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				FA85F9D9264951FD00B8BE72 /* TestUtils.framework */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -449,7 +446,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				FA85F9D5264951FD00B8BE72 /* PBXTargetDependency */,
 				FA12E4EC231EB52D00CAA05B /* PBXTargetDependency */,
 			);
 			name = PrebidDemoTests;
@@ -518,8 +514,8 @@
 					ProjectRef = FA12E472231E9DAA00CAA05B /* PrebidMobile.xcodeproj */;
 				},
 				{
-					ProductGroup = FA85F9D2264951FD00B8BE72 /* Products */;
-					ProjectRef = FA85F9D1264951FD00B8BE72 /* TestUtils.xcodeproj */;
+					ProductGroup = 920E35182754E673007B48EC /* Products */;
+					ProjectRef = 920E35172754E673007B48EC /* TestUtils.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -532,6 +528,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		920E351D2754E673007B48EC /* TestUtils.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = TestUtils.framework;
+			remoteRef = 920E351C2754E673007B48EC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		FA12E478231E9DAA00CAA05B /* PrebidMobile.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -544,13 +547,6 @@
 			fileType = wrapper.cfbundle;
 			path = PrebidMobileTests.xctest;
 			remoteRef = FA12E479231E9DAA00CAA05B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		FA85F9D9264951FD00B8BE72 /* TestUtils.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = TestUtils.framework;
-			remoteRef = FA85F9D8264951FD00B8BE72 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -747,11 +743,6 @@
 			isa = PBXTargetDependency;
 			name = PrebidMobile;
 			targetProxy = FA282EAD2327EC2800C9D477 /* PBXContainerItemProxy */;
-		};
-		FA85F9D5264951FD00B8BE72 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = TestUtils;
-			targetProxy = FA85F9D4264951FD00B8BE72 /* PBXContainerItemProxy */;
 		};
 		FAC9E219232800DB00113B04 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
