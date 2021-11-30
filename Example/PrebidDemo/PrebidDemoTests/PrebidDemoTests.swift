@@ -1015,7 +1015,7 @@ class PrebidDemoTests: XCTestCase, GADBannerViewDelegate, MPAdViewDelegate, MPIn
         let mopubBanner = MPAdView(adUnitId: "a935eac11acd416f92640411234fbba6")
         mopubBanner?.frame = CGRect(x: 20, y: 100, width: 300, height: 250)
         adUnit.fetchDemand(adObject: mopubBanner!) { (resultCode: ResultCode) in
-            XCTAssertEqual(resultCode, ResultCode.prebidDemandFetchSuccess, "expected:Success instead of:\(resultCode.name)")
+            XCTAssertEqual(resultCode, ResultCode.prebidDemandNoBids)
             self.loadSuccesfulException?.fulfill()
         }
         
@@ -1326,8 +1326,10 @@ class PrebidDemoTests: XCTestCase, GADBannerViewDelegate, MPAdViewDelegate, MPIn
             fetchDemandCount += 1
         }
         
-        wait(15)
-        XCTAssertEqual(15, fetchDemandCount)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            XCTAssertEqual(15, fetchDemandCount)
+        }
+        
     }
 
     func testSameConfigIdOnDifferentAdObjects() {
