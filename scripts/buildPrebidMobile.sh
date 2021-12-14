@@ -71,8 +71,7 @@ do
 	-workspace PrebidMobile.xcworkspace \
 	-scheme "${schemes[$n]}" \
 	-configuration Release \
-	-arch arm64 \
-	-sdk "iphoneos" \
+	-destination 'generic/platform=iOS' \
 	-derivedDataPath $XCODE_BUILD_DIR \
 	-archivePath "$XCODE_ARCHIVE_DIR/${schemes[$n]}.xcarchive" \
 	> "$LOG_FILE_FRAMEWORK" 2>&1 || { echo -e "${RED}Error in build check log "$LOG_FILE_FRAMEWORK_ABSOLUTE"${NC}"; exit 1;}
@@ -86,8 +85,7 @@ do
 	-workspace PrebidMobile.xcworkspace \
 	-scheme "${schemes[$n]}" \
 	-configuration Release \
-	-arch x86_64 \
-	-sdk "iphonesimulator" \
+	-destination 'generic/platform=iOS Simulator' \
 	-derivedDataPath $XCODE_BUILD_DIR \
 	-archivePath "$XCODE_ARCHIVE_DIR/${schemes[$n]}$POSTFIX_SIMULATOR.xcarchive" \
 	> "$LOG_FILE_FRAMEWORK" 2>&1 || { echo -e "${RED}Error in build check log "$LOG_FILE_FRAMEWORK_ABSOLUTE"${NC}"; exit 1;}
@@ -98,11 +96,11 @@ do
 	# find all .bcsymbolmap and concatinate -debug-symbols
 	debugSymbolsBcsymbolmap=""
 
-	while read bcsymbolmapsFileName
-	do
-	    # echo "BCSymbolMap: '$bcsymbolmapsFileName'"
-	    debugSymbolsBcsymbolmap="$debugSymbolsBcsymbolmap -debug-symbols \"$bcsymbolmapsFileName\""
-	done < <(find "$XCODE_ARCHIVE_DIR_ABSOLUTE/${schemes[$n]}.xcarchive/BCSymbolMaps" -name "*.bcsymbolmap")
+	# while read bcsymbolmapsFileName
+	# do
+	#     # echo "BCSymbolMap: '$bcsymbolmapsFileName'"
+	#     debugSymbolsBcsymbolmap="$debugSymbolsBcsymbolmap -debug-symbols \"$bcsymbolmapsFileName\""
+	# done < <(find "$XCODE_ARCHIVE_DIR_ABSOLUTE/${schemes[$n]}.xcarchive/BCSymbolMaps" -name "*.bcsymbolmap")
 
 	# echo "debugSymbolsBcsymbolmap: '$debugSymbolsBcsymbolmap'"
 
