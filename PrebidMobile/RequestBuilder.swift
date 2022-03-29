@@ -122,6 +122,8 @@ class RequestBuilder: NSObject {
         extDict["omidpn"] = Targeting.shared.omidPartnerName
         extDict["omidpv"] = Targeting.shared.omidPartnerVersion
         
+        extDict["schain"] = Targeting.shared.schain
+        
         sourceDict["ext"] = extDict
 
         return sourceDict

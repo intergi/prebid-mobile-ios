@@ -72,6 +72,8 @@ import CoreLocation
     
     public var omidPartnerVersion: String?
     
+    public var schain: [String: Any]?
+    
     //Objective-C Api
     @available(swift, obsoleted: 1.0)
     public func setLocationPrecision(_ newValue: NSNumber?) {
