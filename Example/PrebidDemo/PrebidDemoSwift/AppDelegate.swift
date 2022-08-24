@@ -17,7 +17,10 @@ import UIKit
 import PrebidMobile
 import CoreLocation
 import GoogleMobileAds
-import MoPubSDK
+import AppLovinSDK
+import PrebidMobileGAMEventHandlers
+import PrebidMobileAdMobAdapters
+import PrebidMobileMAXAdapters
 #if canImport(AppTrackingTransparency)
 import AppTrackingTransparency
 #endif
@@ -37,7 +40,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         Prebid.shared.prebidServerHost = PrebidHost.Appnexus
         Prebid.shared.prebidServerAccountId = "bfa84af2-bd16-4d35-96ad-31c6bb888df0"
-        
+
         // User Id from External Third Party Sources
         var externalUserIdArray = [ExternalUserId]()
         externalUserIdArray.append(ExternalUserId(source: "adserver.org", identifier: "111111111111", ext: ["rtiPartner" : "TDID"]))
@@ -47,13 +50,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         externalUserIdArray.append(ExternalUserId(source: "sharedid.org", identifier: "111111111111", atype: 1, ext: ["third" : "01ERJWE5FS4RAZKG6SKQ3ZYSKV"]))
         Prebid.shared.externalUserIdArray = externalUserIdArray
 
-        GADMobileAds.sharedInstance().requestConfiguration.testDeviceIdentifiers =  [ (kGADSimulatorID as! String), "cc7ca766f86b43ab6cdc92bed424069b"]
+        GADMobileAds.sharedInstance().requestConfiguration.testDeviceIdentifiers =  [ (kGADSimulatorID as! String), "da5a5e025d9ee432afc53f9fc1273f4e"]
         GADMobileAds.sharedInstance().start()
-        let sdkConfig = MPMoPubConfiguration(adUnitIdForAppInitialization: "a935eac11acd416f92640411234fbba6")
-        sdkConfig.globalMediationSettings = []
 
-        MoPub.sharedInstance().initializeSdk(with: sdkConfig) {
-
+        AdMobUtils.initializeGAD()
+        GAMUtils.shared.initializeGAM()
+        
+        ALSdk.shared()?.mediationProvider = "max"
+        ALSdk.shared()?.userIdentifier = "USER_ID"
+        ALSdk.shared()?.initializeSdk { (configuration: ALSdkConfiguration) in
+            Log.info(String(describing: ALSdk.shared()?.isInitialized))
         }
 
         coreLocation = CLLocationManager()

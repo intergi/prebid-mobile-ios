@@ -14,8 +14,13 @@
  */
 
 #import "AppDelegate.h"
+
 @import PrebidMobile;
-#import "MoPub.h"
+@import GoogleMobileAds;
+@import AppLovinSDK;
+@import PrebidMobileGAMEventHandlers;
+@import PrebidMobileAdMobAdapters;
+@import PrebidMobileMAXAdapters;
 
 @interface AppDelegate ()
 
@@ -25,7 +30,7 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    Targeting.shared.gender = GenderMale;
+    Targeting.shared.userGender = GenderMale;
     
     // User Id from External Third Party Sources
     NSMutableArray<ExternalUserId *>  *externalUserIdArray  = [[NSMutableArray<ExternalUserId *> alloc] init];
@@ -37,10 +42,15 @@
     
     Prebid.shared.externalUserIdArray = externalUserIdArray;
     
-    // Override point for customization after application launch.
-    MPMoPubConfiguration *sdkConfig = [[MPMoPubConfiguration alloc] initWithAdUnitIdForAppInitialization:@"a935eac11acd416f92640411234fbba6"];
-    sdkConfig.globalMediationSettings = @[];
-    [MoPub.sharedInstance initializeSdkWithConfiguration:sdkConfig completion:nil];
+    [GAMUtils.shared initializeGAM];
+
+    [AdMobUtils initializeGAD];
+    
+    [ALSdk shared].mediationProvider = @"max";
+    [ALSdk shared].userIdentifier = @"USER_ID";
+    [[ALSdk shared] initializeSdkWithCompletionHandler:^(ALSdkConfiguration *configuration) {
+        PBMLogInfo(@"%@", ALSdk.shared.isInitialized ? @"YES" : @"NO");
+    }];
     return YES;
 }
 

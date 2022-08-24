@@ -118,6 +118,48 @@ class AdUnitTests: XCTestCase {
 
     }
     
+    func testFetchDemandResumeAutoRefresh() {
+        PBHTTPStubbingManager.shared().enable()
+        PBHTTPStubbingManager.shared().ignoreUnstubbedRequests = true
+        PBHTTPStubbingManager.shared().broadcastRequests = true
+        
+        AdUnitSwizzleHelper.toggleCheckRefreshTime()
+        //given
+        let expectedFetchDemandCount = 2
+        let exception = expectation(description: "\(#function)")
+        exception.expectedFulfillmentCount = expectedFetchDemandCount
+        exception.assertForOverFulfill = false
+        
+        Prebid.shared.prebidServerHost = PrebidHost.Rubicon
+        Prebid.shared.prebidServerAccountId = "1001"
+        let adUnit = BannerAdUnit(configId: "1001-1", size: CGSize(width: 300, height: 250))
+        adUnit.setAutoRefreshMillis(time: 800.0)
+        let testObject: AnyObject = () as AnyObject
+        
+        var fetchDemandCount = 0
+        
+        //when
+        adUnit.fetchDemand(adObject: testObject) { (code: ResultCode) in
+            fetchDemandCount += 1
+            exception.fulfill()
+        }
+        
+        adUnit.stopAutoRefresh()
+        sleep(1)
+        adUnit.resumeAutoRefresh()
+        
+        waitForExpectations(timeout: 2, handler: nil)
+        AdUnitSwizzleHelper.toggleCheckRefreshTime()
+        
+        PBHTTPStubbingManager.shared().disable()
+        PBHTTPStubbingManager.shared().removeAllStubs()
+        PBHTTPStubbingManager.shared().broadcastRequests = false
+        
+        //then
+        XCTAssertEqual(expectedFetchDemandCount, fetchDemandCount)
+
+    }
+    
     func testFetchDemandBidsAutoRefresh() {
         PBHTTPStubbingManager.shared().enable()
         PBHTTPStubbingManager.shared().ignoreUnstubbedRequests = true
@@ -186,7 +228,7 @@ class AdUnitTests: XCTestCase {
         adUnit.stopDispatcher()
         
         //then
-        XCTAssertNil(adUnit.dispatcher)
+        XCTAssertNil(adUnit.dispatcher?.timer)
     }
     
     // MARK: - adunit context data aka inventory data (imp[].ext.context.data)
@@ -307,5 +349,165 @@ class AdUnitTests: XCTestCase {
         
         //then
         XCTAssertEqual(0, set.count)
+    }
+    
+    // MARK: - global context data aka inventory data (app.content.data)
+    func testSetAppContent() {
+        //given
+        let adUnit = AdUnit(configId: "1001-1", size: CGSize(width: 300, height: 250))
+        let appDataObject1 = PBMORTBContentData()
+        appDataObject1.id = "data id"
+        appDataObject1.name = "test name"
+        let appDataObject2 = PBMORTBContentData()
+        appDataObject2.id = "data id"
+        appDataObject2.name = "test name"
+        
+        let appContent = PBMORTBAppContent()
+        appContent.album = "test album"
+        appContent.embeddable = 1
+        appContent.data = [appDataObject1, appDataObject2]
+        //when
+        adUnit.setAppContent(appContent)
+        let resultAppContent = adUnit.getAppContent()!
+
+        //then
+        XCTAssertEqual(2, resultAppContent.data!.count)
+        XCTAssertEqual(resultAppContent.data!.first, appDataObject1)
+        XCTAssertEqual(appContent, resultAppContent)
+    }
+    
+    func testClearAppContent() {
+        //given
+        let adUnit = AdUnit(configId: "1001-1", size: CGSize(width: 300, height: 250))
+        let appDataObject1 = PBMORTBContentData()
+        appDataObject1.id = "data id"
+        appDataObject1.name = "test name"
+        let appDataObject2 = PBMORTBContentData()
+        appDataObject2.id = "data id"
+        appDataObject2.name = "test name"
+        
+        let appContent = PBMORTBAppContent()
+        appContent.album = "test album"
+        appContent.embeddable = 1
+        appContent.data = [appDataObject1, appDataObject2]
+        //when
+        adUnit.setAppContent(appContent)
+        
+        let resultAppContent1 = adUnit.getAppContent()
+        XCTAssertNotNil(resultAppContent1)
+        adUnit.clearAppContent()
+        let resultAppContent2 = adUnit.getAppContent()
+        XCTAssertNil(resultAppContent2)
+    }
+    
+    func testAddAppContentDataObject() {
+        //given
+        let adUnit = AdUnit(configId: "1001-1", size: CGSize(width: 300, height: 250))
+        let appDataObject1 = PBMORTBContentData()
+        appDataObject1.id = "data id"
+        appDataObject1.name = "test name"
+        let appDataObject2 = PBMORTBContentData()
+        appDataObject2.id = "data id"
+        appDataObject2.name = "test name"
+
+        //when
+        adUnit.addAppContentData([appDataObject1, appDataObject2])
+        let objects = adUnit.getAppContent()!.data!
+
+        //then
+        XCTAssertEqual(2, objects.count)
+        XCTAssertEqual(objects.first, appDataObject1)
+    }
+
+    func testRemoveAppContentDataObjects() {
+        let adUnit = AdUnit(configId: "1001-1", size: CGSize(width: 300, height: 250))
+        let appDataObject = PBMORTBContentData()
+        appDataObject.id = "data id"
+        appDataObject.name = "test name"
+
+        adUnit.addAppContentData([appDataObject])
+        let objects1 = adUnit.getAppContent()!.data!
+
+        XCTAssertEqual(1, objects1.count)
+
+        adUnit.removeAppContentData(appDataObject)
+        let objects2 = adUnit.getAppContent()!.data!
+
+        XCTAssertEqual(0, objects2.count)
+    }
+    
+    func testClearAppContentDataObjects() {
+        let adUnit = AdUnit(configId: "1001-1", size: CGSize(width: 300, height: 250))
+        let appDataObject1 = PBMORTBContentData()
+        appDataObject1.id = "data id"
+        appDataObject1.name = "test name"
+        let appDataObject2 = PBMORTBContentData()
+        appDataObject2.id = "data id"
+        appDataObject2.name = "test name"
+
+        adUnit.addAppContentData([appDataObject1, appDataObject2])
+        let objects1 = adUnit.getAppContent()!.data!
+        
+        XCTAssertEqual(2, objects1.count)
+        adUnit.clearAppContentData()
+        let objects2 = adUnit.getAppContent()!.data!
+        XCTAssertEqual(0, objects2.count)
+    }
+    
+//    // MARK: - global user data aka visitor data (user.data)
+
+    func testAddUserDataObjects() {
+        //given
+        let adUnit = AdUnit(configId: "1001-1", size: CGSize(width: 300, height: 250))
+        let userDataObject1 = PBMORTBContentData()
+        userDataObject1.id = "data id"
+        userDataObject1.name = "test name"
+        let userDataObject2 = PBMORTBContentData()
+        userDataObject2.id = "data id"
+        userDataObject2.name = "test name"
+
+        //when
+        adUnit.addUserData([userDataObject1, userDataObject2])
+        let objects = adUnit.getUserData()!
+
+        //then
+        XCTAssertEqual(2, objects.count)
+        XCTAssertEqual(objects.first, userDataObject1)
+    }
+    
+    func testRemoveUserDataObjects() {
+        let adUnit = AdUnit(configId: "1001-1", size: CGSize(width: 300, height: 250))
+        let userDataObject = PBMORTBContentData()
+        userDataObject.id = "data id"
+        userDataObject.name = "test name"
+
+        adUnit.addUserData([userDataObject])
+        let objects1 = adUnit.getUserData()!
+
+        XCTAssertEqual(1, objects1.count)
+
+        adUnit.removeUserData(userDataObject)
+        let objects2 = adUnit.getUserData()!
+
+        XCTAssertEqual(0, objects2.count)
+    }
+
+    func testClearUserDataObjects() {
+        let adUnit = AdUnit(configId: "1001-1", size: CGSize(width: 300, height: 250))
+        let userDataObject1 = PBMORTBContentData()
+        userDataObject1.id = "data id"
+        userDataObject1.name = "test name"
+        let userDataObject2 = PBMORTBContentData()
+        userDataObject2.id = "data id"
+        userDataObject2.name = "test name"
+
+        adUnit.addUserData([userDataObject1, userDataObject2])
+        let objects1 = adUnit.getUserData()!
+
+        XCTAssertEqual(2, objects1.count)
+
+        adUnit.clearUserData()
+        let objects2 = adUnit.getUserData()!
+        XCTAssertEqual(0, objects2.count)
     }
 }

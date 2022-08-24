@@ -2,51 +2,97 @@ if [ -d "scripts" ]; then
 cd scripts/
 fi
 
+# Flags:
+# -l:   run tests only for the latest iOS.
+#       It is needed for CircleCI builds.
+#       Do not use this flag locally to keep everything updated.
+
+run_only_with_latest_ios="NO"
+
+while getopts 'l' flag; do
+  case "${flag}" in
+    l) run_only_with_latest_ios="YES" ;;
+  esac
+done
+
 set -e
 
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
-echo -e "\n\n${GREEN}TEST PREBID MOBILE${NC}\n\n"
+echo -e "\n\n${GREEN}INSTALL PODS${NC}\n\n"
 
 cd ..
-echo $PWD
 
 gem install xcpretty --user-install
-gem install xcpretty-travis-formatter --user-install
-
-echo -e "\n${GREEN}Building Swift Package Manager${NC} \n"
-swift build -Xswiftc "-sdk" -Xswiftc "`xcrun --sdk iphonesimulator --show-sdk-path`" -Xswiftc "-target" -Xswiftc "x86_64-apple-ios13.0-simulator" | xcpretty -f `xcpretty-travis-formatter` --color --test
-if [[ ${PIPESTATUS[0]} == 0 ]]; then
-    echo "✅ Swift Package Manager Passed"
-else
-    echo "🔴 Swift Package Manager Failed"
-    exit 1
-fi
 
 gem install cocoapods --user-install
 pod install --repo-update
 
-echo -e "\n${GREEN}Running some unit tests for iOS 13${NC} \n"
-xcodebuild test -workspace PrebidMobile.xcworkspace  -scheme "PrebidMobileTests" -destination 'platform=iOS Simulator,name=iPhone 11 Pro Max,OS=13.0' -only-testing PrebidMobileTests/RequestBuilderTests/testPostData | xcpretty -f `xcpretty-travis-formatter` --color --test
+echo -e "\n\n${GREEN}TEST PREBID MOBILE${NC}\n\n"
+
+if [ "$run_only_with_latest_ios" != "YES" ]
+then
+ echo -e "\n${GREEN}Running some unit tests for iOS 13${NC} \n"
+ xcodebuild test \
+    -workspace PrebidMobile.xcworkspace \
+    -scheme "PrebidMobileTests" \
+    -destination 'platform=iOS Simulator,name=iPhone 11 Pro Max,OS=13.7' \
+    -only-testing PrebidMobileTests/RequestBuilderTests/testPostData | xcpretty --color --test
+
+ if [[ ${PIPESTATUS[0]} == 0 ]]; then
+     echo "✅ unit tests for iOS 13 Passed"
+ else
+     echo "🔴 unit tests for iOS 13 Failed"
+     exit 1
+ fi
+ 
+fi
+
+echo -e "\n${GREEN}Running PrebidMobile unit tests${NC} \n"
+xcodebuild test \
+    -workspace PrebidMobile.xcworkspace \
+    -scheme "PrebidMobileTests" \
+    -destination 'platform=iOS Simulator,name=iPhone 11 Pro Max,OS=latest' | xcpretty --color --test
 
 if [[ ${PIPESTATUS[0]} == 0 ]]; then
-    echo "✅ unit tests for iOS 13 Passed"
+    echo "✅ PrebidMobile Unit Tests Passed"
 else
-    echo "🔴 unit tests for iOS 13 Failed"
+    echo "🔴 PrebidMobile Unit Tests Failed"
     exit 1
 fi
 
-echo -e "\n${GREEN}Running unit tests${NC} \n"
-xcodebuild test -workspace PrebidMobile.xcworkspace  -scheme "PrebidMobileTests" -destination 'platform=iOS Simulator,name=iPhone 11 Pro Max,OS=latest' | xcpretty -f `xcpretty-travis-formatter` --color --test
+echo -e "\n${GREEN}Running PrebidMobileGAMEventHandlers unit tests${NC} \n"
+xcodebuild test \
+    -workspace PrebidMobile.xcworkspace  \
+    -scheme "PrebidMobileGAMEventHandlersTests" \
+    -destination 'platform=iOS Simulator,name=iPhone 11 Pro Max,OS=latest' | xcpretty --color --test
 
 if [[ ${PIPESTATUS[0]} == 0 ]]; then
-    echo "✅ Unit Tests Passed"
+    echo "✅ PrebidMobileGAMEventHandlers Unit Tests Passed"
 else
-    echo "🔴 Unit Tests Failed"
+    echo "🔴 PrebidMobileGAMEventHandlers Unit Tests Failed"
     exit 1
 fi
 
+echo -e "\n${GREEN}Running PrebidMobileAdMobAdapters unit tests${NC} \n"
+xcodebuild test -workspace PrebidMobile.xcworkspace  -scheme "PrebidMobileAdMobAdaptersTests" -destination 'platform=iOS Simulator,name=iPhone 11 Pro Max,OS=latest' | xcpretty -f `xcpretty-travis-formatter` --color --test
+
+if [[ ${PIPESTATUS[0]} == 0 ]]; then
+    echo "✅ PrebidMobileAdMobAdapters Unit Tests Passed"
+else
+    echo "🔴 PrebidMobileAdMobAdapters Unit Tests Failed"
+    exit 1
+fi
+
+echo -e "\n${GREEN}Running PrebidMobileMAXAdapters unit tests${NC} \n"
+xcodebuild test -workspace PrebidMobile.xcworkspace  -scheme "PrebidMobileMAXAdaptersTests" -destination 'platform=iOS Simulator,name=iPhone 11 Pro Max,OS=latest' | xcpretty -f `xcpretty-travis-formatter` --color --test
+
+if [[ ${PIPESTATUS[0]} == 0 ]]; then
+    echo "✅ PrebidMobileMAXAdapters Unit Tests Passed"
+else
+    echo "🔴 PrebidMobileMAXAdapters Unit Tests Failed"
+    exit 1
+fi
 # echo -e "\n${GREEN}Running swiftlint tests${NC} \n"
 # swiftlint --config .swiftlint.yml
-

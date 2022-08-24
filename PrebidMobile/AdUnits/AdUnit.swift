@@ -14,22 +14,39 @@ import UIKit
 import ObjectiveC.runtime
 
 @objcMembers public class AdUnit: NSObject, DispatcherDelegate {
-
-    public var pbAdSlot: String? = nil
-
+    
+    public var pbAdSlot: String? {
+        get { adUnitConfig.getPbAdSlot()}
+        set { adUnitConfig.setPbAdSlot(newValue) }
+    }
+    
     private static let PB_MIN_RefreshTime = 30000.0
-
-    var prebidConfigId: String = ""
-
-    var adSizes = Array<CGSize> ()
 
     var identifier: String
 
     var dispatcher: Dispatcher?
-
-    private var contextDataDictionary = [String: Set<String>]()
-
-    private var contextKeywordsSet = Set<String>()
+    
+    var adUnitConfig: AdUnitConfig
+    
+    var bidRequester: PBMBidRequester?
+    
+    var adSizes: [CGSize] {
+        get { [adUnitConfig.adSize] + (adUnitConfig.additionalSizes ?? []) }
+        set {
+            if let adSize = newValue.first {
+                adUnitConfig.adSize = adSize
+            }
+            
+            if newValue.count > 1 {
+                adUnitConfig.additionalSizes = Array(newValue.dropFirst())
+            }
+        }
+    }
+    
+    var prebidConfigId: String {
+        get { adUnitConfig.configId }
+        set { adUnitConfig.configId = newValue }
+    }
 
     //This flag is set to check if the refresh needs to be made though the user has not invoked the fetch demand after initialization
     private var isInitialFetchDemandCallMade: Bool = false
@@ -44,16 +61,14 @@ import ObjectiveC.runtime
 
     //notification flag set to determine if delegate call needs to be made after timeout delegate is sent
     var timeOutSignalSent: Bool! = false
-    
-    private var appContent: ContentObject?
 
-    init(configId: String, size: CGSize?) {
-        prebidConfigId = configId
-        if let givenSize = size {
-           adSizes.append(givenSize)
-        }
+    public init(configId: String, size: CGSize?) {
+        adUnitConfig = AdUnitConfig(configId: configId, size: size ?? CGSize.zero)
         identifier = UUID.init().uuidString
         super.init()
+        
+        // PBS should cache the bid for original api.
+        Prebid.shared.useCacheForReportingWithRenderingAPI = true
     }
 
     //TODO: dynamic is used by tests
@@ -66,7 +81,9 @@ import ObjectiveC.runtime
         fetchDemand(adObject: dictContainer) { (resultCode) in
             let dict = dictContainer.dict
 
-            completion(resultCode, dict.count > 0 ? dict : nil)
+            DispatchQueue.main.async {
+                completion(resultCode, dict.count > 0 ? dict : nil)
+            }
         }
     }
 
@@ -76,7 +93,7 @@ import ObjectiveC.runtime
         if !(self is NativeRequest){
             for size in adSizes {
                 if (size.width < 0 || size.height < 0) {
-                    completion(ResultCode.prebidInvalidSize)
+                    completion(.prebidInvalidSize)
                     return
                 }
             }
@@ -85,11 +102,11 @@ import ObjectiveC.runtime
         Utils.shared.removeHBKeywords(adObject: adObject)
 
         if (prebidConfigId.isEmpty || (prebidConfigId.trimmingCharacters(in: CharacterSet.whitespaces)).count == 0) {
-            completion(ResultCode.prebidInvalidConfigId)
+            completion(.prebidInvalidConfigId)
             return
         }
         if (Prebid.shared.prebidServerAccountId.isEmpty || (Prebid.shared.prebidServerAccountId.trimmingCharacters(in: CharacterSet.whitespaces)).count == 0) {
-            completion(ResultCode.prebidInvalidAccountId)
+            completion(.prebidInvalidAccountId)
             return
         }
 
@@ -102,30 +119,66 @@ import ObjectiveC.runtime
         timeOutSignalSent = false
         self.closureAd = completion
         adServerObject = adObject
-        let manager: BidManager = BidManager(adUnit: self)
 
-        manager.requestBidsForAdUnit { (bidResponse, resultCode) in
+        bidRequester = PBMBidRequester(connection: ServerConnection.shared,
+                                       sdkConfiguration: Prebid.shared,
+                                       targeting: Targeting.shared,
+                                       adUnitConfiguration: adUnitConfig)
+        
+        bidRequester?.requestBids { [weak self] bidResponse, error in
+            guard let self = self else { return }
             self.didReceiveResponse = true
-            if (bidResponse != nil) {
+            
+            if let bidResponse = bidResponse {
                 if (!self.timeOutSignalSent) {
-                    Utils.shared.validateAndAttachKeywords (adObject: adObject, bidResponse: bidResponse!)
-                    completion(resultCode)
+                    self.handleBidResponse(adObject: adObject, bidResponse: bidResponse) { resultCode in
+                        if resultCode == .prebidDemandFetchSuccess {
+                            Utils.shared.validateAndAttachKeywords (adObject: adObject, bidResponse: bidResponse)
+                        }
+                        completion(resultCode)
+                        return
+                    }
                 }
-
             } else {
                 if (!self.timeOutSignalSent) {
-                    completion(resultCode)
+                    completion(PBMError.demandResult(from: error))
+                    return
                 }
             }
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(Prebid.shared.timeoutMillisDynamic), execute: {
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(Int(truncating: Prebid.shared.timeoutMillisDynamic ?? NSNumber(value: .PB_Request_Timeout))), execute: {
             if (!self.didReceiveResponse) {
                 self.timeOutSignalSent = true
-                completion(ResultCode.prebidDemandTimedOut)
-
+                completion(.prebidDemandTimedOut)
+                return
             }
         })
+    }
+    
+    private func handleBidResponse(adObject: AnyObject, bidResponse: BidResponse, completion: (ResultCode) -> Void) {
+        if let winningBid = bidResponse.winningBid {
+            if self.adUnitConfig.adFormats.contains(AdFormat.native) {
+                let expireInterval = TimeInterval(truncating: winningBid.bid.exp ?? CacheManager.cacheManagerExpireInterval as NSNumber)
+                do {
+                    if let cacheId = CacheManager.shared.save(content: try winningBid.bid.toJsonString(), expireInterval: expireInterval), !cacheId.isEmpty {
+                        var newTargetingInfo = bidResponse.targetingInfo ?? [:]
+                        newTargetingInfo[PrebidLocalCacheIdKey] = cacheId
+                        bidResponse.setTargetingInfo(with: newTargetingInfo)
+                        completion(.prebidDemandFetchSuccess)
+                        return
+                    }
+                } catch {
+                    Log.error("Error saving bid content to cache: \(error.localizedDescription)")
+                }
+            } else {
+                completion(.prebidDemandFetchSuccess)
+                return
+            }
+        } else {
+            completion(.prebidDemandNoBids)
+            return
+        }
     }
 
     // MARK: - adunit context data aka inventory data (imp[].ext.context.data)
@@ -135,7 +188,7 @@ import ObjectiveC.runtime
      * if the key already exists the value will be appended to the list. No duplicates will be added
      */
     public func addContextData(key: String, value: String) {
-        contextDataDictionary.addValue(value, forKey: key)
+        adUnitConfig.addContextData(key: key, value: value)
     }
     
     /**
@@ -143,26 +196,25 @@ import ObjectiveC.runtime
      * the values if the key already exist will be replaced with the new set of values
      */
     public func updateContextData(key: String, value: Set<String>) {
-        contextDataDictionary.updateValue(value, forKey: key)
+        adUnitConfig.updateContextData(key: key, value: value)
     }
     
     /**
      * This method allows to remove specific context data keyword & values set from adunit context targeting
      */
     public func removeContextData(forKey: String) {
-        contextDataDictionary.removeValue(forKey: forKey)
+        adUnitConfig.removeContextData(for: forKey)
     }
     
     /**
      * This method allows to remove all context data set from adunit context targeting
      */
     public func clearContextData() {
-        contextDataDictionary.removeAll()
+        adUnitConfig.clearContextData()
     }
     
-    func getContextDataDictionary() -> [String: Set<String>] {
-        Log.info("adunit context data dictionary is \(contextDataDictionary)")
-        return contextDataDictionary
+    func getContextDataDictionary() -> [String: [String]] {
+        return adUnitConfig.getContextData()
     }
     
     // MARK: - adunit context keywords (imp[].ext.context.keywords)
@@ -172,7 +224,7 @@ import ObjectiveC.runtime
      * Inserts the given element in the set if it is not already present.
      */
     public func addContextKeyword(_ newElement: String) {
-        contextKeywordsSet.insert(newElement)
+        adUnitConfig.addContextKeyword(newElement)
     }
     
     /**
@@ -180,26 +232,69 @@ import ObjectiveC.runtime
      * Adds the elements of the given set to the set.
      */
     public func addContextKeywords(_ newElements: Set<String>) {
-        contextKeywordsSet.formUnion(newElements)
+        adUnitConfig.addContextKeywords(newElements)
     }
     
     /**
      * This method allows to remove specific context keyword from adunit context targeting
      */
     public func removeContextKeyword(_ element: String) {
-        contextKeywordsSet.remove(element)
+        adUnitConfig.removeContextKeyword(element)
     }
     
     /**
      * This method allows to remove all keywords from the set of adunit context targeting
      */
     public func clearContextKeywords() {
-        contextKeywordsSet.removeAll()
+        adUnitConfig.clearContextKeywords()
     }
     
     func getContextKeywordsSet() -> Set<String> {
-        Log.info("adunit context keywords set is \(contextKeywordsSet)")
-        return contextKeywordsSet
+        adUnitConfig.getContextKeywords()
+    }
+    
+    // MARK: - App Content
+    
+    public func setAppContent(_ appContentObject: PBMORTBAppContent) {
+        adUnitConfig.setAppContent(appContentObject)
+    }
+    
+    public func getAppContent() -> PBMORTBAppContent? {
+        return adUnitConfig.getAppContent()
+    }
+    
+    public func clearAppContent() {
+        adUnitConfig.clearAppContent()
+    }
+    
+    public func addAppContentData(_ dataObjects: [PBMORTBContentData]) {
+        adUnitConfig.addAppContentData(dataObjects)
+    }
+
+    public func removeAppContentData(_ dataObject: PBMORTBContentData) {
+        adUnitConfig.removeAppContentData(dataObject)
+    }
+    
+    public func clearAppContentData() {
+        adUnitConfig.clearAppContentData()
+    }
+    
+    // MARK: - User Data
+        
+    public func getUserData() -> [PBMORTBContentData]? {
+        return adUnitConfig.getUserData()
+    }
+    
+    public func addUserData(_ userDataObjects: [PBMORTBContentData]) {
+        adUnitConfig.addUserData(userDataObjects)
+    }
+    
+    public func removeUserData(_ userDataObject: PBMORTBContentData) {
+        adUnitConfig.removeUserData(userDataObject)
+    }
+    
+    public func clearUserData() {
+        adUnitConfig.clearUserData()
     }
 
     // MARK: - others
@@ -211,13 +306,18 @@ import ObjectiveC.runtime
      */
     public func setAutoRefreshMillis(time: Double) {
 
-        stopDispatcher()
-
         guard checkRefreshTime(time) else {
             Log.error("auto refresh not set as the refresh time is less than to \(AdUnit.PB_MIN_RefreshTime as Double) seconds")
             return
         }
-
+        
+        if self.dispatcher?.state == .stopped {
+            self.dispatcher?.setAutoRefreshMillis(time: time)
+            return
+        }
+        
+        stopDispatcher()
+        
         initDispatcher(refreshTime: time)
 
         if isInitialFetchDemandCallMade {
@@ -230,6 +330,14 @@ import ObjectiveC.runtime
      */
     public func stopAutoRefresh() {
         stopDispatcher()
+    }
+    
+    public func resumeAutoRefresh() {
+        if self.dispatcher?.state == .stopped {
+            if isInitialFetchDemandCallMade {
+                startDispatcher()
+            }
+        }
     }
 
     dynamic func checkRefreshTime(_ time: Double) -> Bool {
@@ -259,7 +367,6 @@ import ObjectiveC.runtime
             Log.verbose("Dispatcher is nil")
             return
         }
-
         dispatcher.start()
     }
 
@@ -268,27 +375,6 @@ import ObjectiveC.runtime
             Log.verbose("Dispatcher is nil")
             return
         }
-
         dispatcher.stop()
-        self.dispatcher = nil
     }
-    
-    public func setAppContent(appContent: ContentObject) {
-        self.appContent = appContent
-    }
-    
-    func getAppContent() -> ContentObject? {
-        return self.appContent
-    }
-
-}
-
-/// Describes an [OpenRTB](https://www.iab.com/wp-content/uploads/2016/03/OpenRTB-API-Specification-Version-2-5-FINAL.pdf) app: content object
-
-@objc(PBAdUnitContentObject)
-public class ContentObject: NSObject {
-    
-    @objc
-    public var url: String?
-    
 }

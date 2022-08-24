@@ -16,6 +16,8 @@
 #import <CoreTelephony/CTCarrier.h>
 #import <CoreTelephony/CTTelephonyNetworkInfo.h>
 #import <AdSupport/AdSupport.h>
+#import <CoreGraphics/CoreGraphics.h>
+#import <UIKit/UIKit.h>
 @import PrebidMobile;
 
 
@@ -221,7 +223,7 @@ static NSString *const kPrebidMobileVersion = @"0.5.3";
     }
     
     NSString *gender;
-    switch ([[Targeting shared] gender]) {
+    switch ([[Targeting shared] userGender]) {
         case GenderMale:
             gender = @"M";
             break;

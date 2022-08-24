@@ -13,15 +13,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import Foundation
-
+import UIKit
 
 public class VideoBaseAdUnit: AdUnit {
 
-    public var parameters: Parameters?
-
-    //MARK: - Parameters class
+    public var parameters: VideoParameters {
+        get { adUnitConfig.adConfiguration.videoParameters }
+        set { adUnitConfig.adConfiguration.videoParameters = newValue }
+    }
     
+    public override init(configId: String, size: CGSize?) {
+        super.init(configId: configId, size: size)
+        adUnitConfig.adFormats = [.video]
+    }
+    
+    @available(*, deprecated, message: "This class is deprecated. Please, use VideoParameters instead.")
     /// Describes an [OpenRTB](https://www.iab.com/wp-content/uploads/2016/03/OpenRTB-API-Specification-Version-2-5-FINAL.pdf) video object
     @objc(PBVideoAdUnitParameters)
     public class Parameters: NSObject {
@@ -72,6 +78,5 @@ public class VideoBaseAdUnit: AdUnit {
         /// Placement type for the impression.
         @objc
         public var placement: Signals.Placement?
-        
     }
 }

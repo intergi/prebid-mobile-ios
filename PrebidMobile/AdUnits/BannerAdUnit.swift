@@ -22,7 +22,9 @@ public class BannerAdUnit: BannerBaseAdUnit {
     }
 
     public func addAdditionalSize(sizes: [CGSize]) {
-        super.adSizes += sizes
+        if super.adUnitConfig.additionalSizes == nil {
+            super.adUnitConfig.additionalSizes = [CGSize]()
+        }
+        super.adUnitConfig.additionalSizes?.append(contentsOf: sizes)
     }
-
 }
