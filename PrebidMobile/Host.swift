@@ -18,7 +18,7 @@ import UIKit
 @objc public enum PrebidHost: Int {
     
     /**
-     URL [https://prebid.adnxs.com/pbs/v1/openrtb2/auction](URL)
+     URL [https://ib.adnxs.com/openrtb2/prebid](URL)
     */
     case Appnexus
     
@@ -31,16 +31,17 @@ import UIKit
 
     func name () -> String {
         switch self {
-        case .Appnexus: return "https://prebid.adnxs.com/pbs/v1/openrtb2/auction"
+        case .Appnexus: return "https://ib.adnxs.com/openrtb2/prebid"
         case .Rubicon: return "https://prebid-server.rubiconproject.com/openrtb2/auction"
         case .Custom: return ""
         }
     }
 }
 
-class Host: NSObject {
+@objcMembers
+public class Host: NSObject {
 
-    var prebidServerURL: String? = .EMPTY_String
+    private var customHostURL: URL?
 
     /**
      * The class is created as a singleton object & used
@@ -54,26 +55,25 @@ class Host: NSObject {
     /**
      * The CustomHost property holds the URL for the custom prebid adaptor
      */
-    public var setHostURL: String {
-        get {
-            return self.prebidServerURL!
+    
+    @objc public func setCustomHostURL(_ urlString: String?) throws {
+        guard let url = URL(string: urlString!) else {
+            throw ErrorCode.prebidServerURLInvalid(urlString ?? "")
         }
-        set {
-
-            self.prebidServerURL = newValue
-
-        }
+        customHostURL = url
     }
 
     /**
      * This function retrieves the prebid server URL for the selected host
      */
-    func getHostURL(host: PrebidHost) throws -> String {
+    public func getHostURL(host: PrebidHost) throws -> String {
         if (host == PrebidHost.Custom) {
-            if (verifyUrl(urlString: self.prebidServerURL) == false) {
-                throw ErrorCode.prebidServerURLInvalid(self.prebidServerURL!)
+
+            if let customHostURL = customHostURL {
+                return customHostURL.absoluteString
+            } else {
+                throw ErrorCode.prebidServerURLInvalid("")
             }
-            return self.prebidServerURL!
         }
 
         return host.name()
@@ -82,7 +82,7 @@ class Host: NSObject {
     /**
      * This function verifies if the prebid server URL is in the url format
      */
-    func verifyUrl (urlString: String?) -> Bool {
+    public func verifyUrl (urlString: String?) -> Bool {
         //Check for nil
         if let urlString = urlString {
             // create NSURL instance

@@ -18,7 +18,7 @@ import TestUtils
 @testable import PrebidMobile
 @testable import PrebidDemoSwift
 
-class NativeInAppNativeTest: XCTestCase, NativeAdDelegate, NativeAdEventDelegate {
+class NativeInAppNativeTest: XCTestCase {
     
     var request: URLRequest!
     var jsonRequestBody = [String: Any]()
@@ -32,7 +32,7 @@ class NativeInAppNativeTest: XCTestCase, NativeAdDelegate, NativeAdEventDelegate
     
     var timeoutForImpbusRequest: TimeInterval = 0.0
     
-    var nativeAd:NativeAd?
+    var nativeAd: NativeAd?
     var nativeAdView: NativeAdView!
     var nativeUnit: NativeRequest!
     var eventTrackers: NativeEventTracker!
@@ -43,26 +43,15 @@ class NativeInAppNativeTest: XCTestCase, NativeAdDelegate, NativeAdEventDelegate
     }
 
     override func setUp() {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
         Prebid.shared.prebidServerHost = .Appnexus
         Prebid.shared.prebidServerAccountId = Constants.PBS_ACCOUNT_ID_APPNEXUS
         timeoutForImpbusRequest = 20.0
-        PBHTTPStubbingManager.shared().enable()
-        PBHTTPStubbingManager.shared().ignoreUnstubbedRequests = true
-        PBHTTPStubbingManager.shared().broadcastRequests = true
+        StubbingHandler.shared.turnOn()
         NotificationCenter.default.addObserver(self, selector: #selector(self.requestCompleted(_:)), name: NSNotification.Name.pbhttpStubURLProtocolRequestDidLoad, object: nil)
-        
-        let storyboard = UIStoryboard(name: "Main",bundle: Bundle.main)
-        viewController = storyboard.instantiateViewController(withIdentifier: "NativeInAppViewController") as? NativeInAppViewController
-        let appDelegate = (UIApplication.shared.delegate as! AppDelegate)
-        appDelegate.window?.rootViewController = viewController
     }
-
+    
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        PBHTTPStubbingManager.shared().disable()
-        PBHTTPStubbingManager.shared().removeAllStubs()
-        PBHTTPStubbingManager.shared().broadcastRequests = false
+        StubbingHandler.shared.turnOff()
         adExpiredAPIForNativeAd = nil
         adDidClickAPIForNativeAd = nil
         adDidLogImpressionAPIForNativeAd = nil
@@ -74,76 +63,11 @@ class NativeInAppNativeTest: XCTestCase, NativeAdDelegate, NativeAdEventDelegate
     }
 
     // MARK: - Test methods.
-    func testSuccessfulNativeInAppResponseForMoPub() {
-        nativeInAppAdLoadedExpectation = expectation(description: "\(#function)")
-        stubAppNexusRequestWithResponse("NativeAdResponse")
-        createNativeInAppView()
-        loadNativeAssets()
-        let mpNativeAd = MPNativeAd()
-        let mopubNativeObject = MPNativeAdRequest()
-        let mopubNativeAdRequestTargeting = MPNativeAdRequestTargeting()
-        mopubNativeObject.targeting = mopubNativeAdRequestTargeting
-        
-        nativeUnit.fetchDemand(adObject: mopubNativeObject) { [weak self] (resultCode: ResultCode) in
-            let array = mopubNativeObject.targeting.keywords.components(separatedBy: ",")
-            for keyword in array{
-                let keywordArr = keyword.components(separatedBy: ":")
-                mpNativeAd.p_customProperties[keywordArr[0]] = keywordArr[1] as AnyObject
-            }
-            Utils.shared.delegate = self
-            Utils.shared.findNative(adObject: mpNativeAd)
-        }
-        waitForExpectations(timeout: timeoutForImpbusRequest, handler: nil)
-    }
-    
-    func testNativeInAppResponseNotFoundForMoPub() {
-        nativeInAppAdNotFoundExpectation = expectation(description: "\(#function)")
-        stubAppNexusRequestWithResponse("NativeAdResponse")
-        createNativeInAppView()
-        loadNativeAssets()
-        let mpNativeAd = MPNativeAd()
-        let mopubNativeObject = MPNativeAdRequest()
-        let mopubNativeAdRequestTargeting = MPNativeAdRequestTargeting()
-        mopubNativeObject.targeting = mopubNativeAdRequestTargeting
-        
-        nativeUnit.fetchDemand(adObject: mopubNativeObject) { [weak self] (resultCode: ResultCode) in
-            let array = mopubNativeObject.targeting.keywords.components(separatedBy: ",")
-            for keyword in array{
-                let keywordArr = keyword.components(separatedBy: ":")
-                mpNativeAd.p_customProperties[keywordArr[0]] = keywordArr[1] as AnyObject
-            }
-            mpNativeAd.p_customProperties["isPrebid"] = 0 as AnyObject
-            Utils.shared.delegate = self
-            Utils.shared.findNative(adObject: mpNativeAd)
-        }
-        waitForExpectations(timeout: timeoutForImpbusRequest, handler: nil)
-    }
-    
-    func testNativeInAppResponseNotValidForMoPub() {
-        nativeInAppAdNotValidExpectation = expectation(description: "\(#function)")
-        stubAppNexusRequestWithResponse("NativeAdInvalidResponse")
-        createNativeInAppView()
-        loadNativeAssets()
-        let mpNativeAd = MPNativeAd()
-        let mopubNativeObject = MPNativeAdRequest()
-        let mopubNativeAdRequestTargeting = MPNativeAdRequestTargeting()
-        mopubNativeObject.targeting = mopubNativeAdRequestTargeting
-        
-        nativeUnit.fetchDemand(adObject: mopubNativeObject) { [weak self] (resultCode: ResultCode) in
-            let array = mopubNativeObject.targeting.keywords.components(separatedBy: ",")
-            for keyword in array{
-                let keywordArr = keyword.components(separatedBy: ":")
-                mpNativeAd.p_customProperties[keywordArr[0]] = keywordArr[1] as AnyObject
-            }
-            Utils.shared.delegate = self
-            Utils.shared.findNative(adObject: mpNativeAd)
-        }
-        waitForExpectations(timeout: timeoutForImpbusRequest, handler: nil)
-    }
     
     func testSuccessfulNativeInAppResponseForDFP() {
+        setupViewController(for: .originalGAM)
         nativeInAppAdLoadedExpectation = expectation(description: "\(#function)")
-        stubAppNexusRequestWithResponse("NativeAdResponse")
+        StubbingHandler.shared.stubRequest(with: "NativeAdResponse", requestURL: Constants.PBS_APPNEXUS_HOST_URL)
         createNativeInAppView()
         loadNativeAssets()
         let gadNativeCustomTemplateAd = GADNativeCustomTemplateAd()
@@ -160,8 +84,9 @@ class NativeInAppNativeTest: XCTestCase, NativeAdDelegate, NativeAdEventDelegate
     }
     
     func testNativeInAppResponseNotFoundForDFP() {
+        setupViewController(for: .originalGAM)
         nativeInAppAdNotFoundExpectation = expectation(description: "\(#function)")
-        stubAppNexusRequestWithResponse("NativeAdResponse")
+        StubbingHandler.shared.stubRequest(with: "NativeAdResponse", requestURL: Constants.PBS_APPNEXUS_HOST_URL)
         createNativeInAppView()
         loadNativeAssets()
         let gadNativeCustomTemplateAd = GADNativeCustomTemplateAd()
@@ -178,8 +103,9 @@ class NativeInAppNativeTest: XCTestCase, NativeAdDelegate, NativeAdEventDelegate
     }
     
     func testNativeInAppResponseNotValidForDFP() {
+        setupViewController(for: .originalGAM)
         nativeInAppAdNotValidExpectation = expectation(description: "\(#function)")
-        stubAppNexusRequestWithResponse("NativeAdInvalidResponse")
+        StubbingHandler.shared.stubRequest(with: "NativeAdInvalidResponse", requestURL: Constants.PBS_APPNEXUS_HOST_URL)
         createNativeInAppView()
         loadNativeAssets()
         let gadNativeCustomTemplateAd = GADNativeCustomTemplateAd()
@@ -196,8 +122,9 @@ class NativeInAppNativeTest: XCTestCase, NativeAdDelegate, NativeAdEventDelegate
     }
     
     func testNativeInAppAdWithAdDidLogImpression() {
+        setupViewController(for: .originalGAM)
         adDidLogImpressionAPIForNativeAd = expectation(description: "\(#function)")
-        stubAppNexusRequestWithResponse("NativeAdResponse")
+        StubbingHandler.shared.stubRequest(with: "NativeAdResponse", requestURL: Constants.PBS_APPNEXUS_HOST_URL)
         createNativeInAppView()
         loadNativeAssets()
         let gadNativeCustomTemplateAd = GADNativeCustomTemplateAd()
@@ -214,8 +141,9 @@ class NativeInAppNativeTest: XCTestCase, NativeAdDelegate, NativeAdEventDelegate
     }
     
     func testNativeInAppAdWithAdWasClicked() {
+        setupViewController(for: .originalGAM)
         adDidClickAPIForNativeAd = expectation(description: "\(#function)")
-        stubAppNexusRequestWithResponse("NativeAdResponse")
+        StubbingHandler.shared.stubRequest(with: "NativeAdResponse", requestURL: Constants.PBS_APPNEXUS_HOST_URL)
         createNativeInAppView()
         loadNativeAssets()
         let gadNativeCustomTemplateAd = GADNativeCustomTemplateAd()
@@ -232,6 +160,7 @@ class NativeInAppNativeTest: XCTestCase, NativeAdDelegate, NativeAdEventDelegate
     }
     
     func testNativeInAppAdWithAdDidExpired() {
+        setupViewController(for: .originalGAM)
         adExpiredAPIForNativeAd = expectation(description: "\(#function)")
         let gadNativeCustomTemplateAd = GADNativeCustomTemplateAd()
         let currentBundle = Bundle(for: TestUtils.PBHTTPStubbingManager.self)
@@ -247,7 +176,72 @@ class NativeInAppNativeTest: XCTestCase, NativeAdDelegate, NativeAdEventDelegate
         waitForExpectations(timeout: timeoutForImpbusRequest, handler: nil)
     }
     
-    //MARK: : Native functions
+    func requestCompleted(_ notification: Notification?) {
+        let incomingRequest = notification?.userInfo![kPBHTTPStubURLProtocolRequest] as? URLRequest
+        let requestString = incomingRequest?.url?.absoluteString
+        let searchString = Constants.PBS_APPNEXUS_HOST_URL
+        if request == nil && requestString?.range(of: searchString) != nil {
+            request = notification!.userInfo![kPBHTTPStubURLProtocolRequest] as? URLRequest
+            jsonRequestBody = PBHTTPStubbingManager.jsonBodyOfURLRequest(asDictionary: request) as! [String: Any]
+        }
+    }
+    
+    private func setupViewController(for integrationKind: IntegrationKind) {
+        let storyboard = UIStoryboard(name: "Main",bundle: Bundle.main)
+        viewController = storyboard.instantiateViewController(withIdentifier: "NativeInAppViewController") as? NativeInAppViewController
+        viewController?.integrationKind = integrationKind
+        let appDelegate = (UIApplication.shared.delegate as! AppDelegate)
+        appDelegate.window?.rootViewController = viewController
+    }
+}
+
+// MARK: - NativeAdDelegate
+
+extension NativeInAppNativeTest: NativeAdDelegate {
+    func nativeAdLoaded(ad: NativeAd) {
+        nativeAd = ad
+        CacheManager.shared.delegate = ad
+        nativeAd?.delegate = self
+        if let nativeAdView = nativeAdView {
+            nativeAd?.registerView(view: nativeAdView, clickableViews: [nativeAdView.callToActionButton])
+        }
+        renderNativeInAppAd()
+        self.nativeInAppAdLoadedExpectation?.fulfill()
+        if self.adDidClickAPIForNativeAd != nil {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0, execute: {
+                self.nativeAdView?.callToActionButton.sendActions(for: .touchUpInside)
+            })
+        }
+    }
+    
+    func nativeAdNotFound() {
+        self.nativeInAppAdNotFoundExpectation?.fulfill()
+    }
+    
+    func nativeAdNotValid() {
+        self.nativeInAppAdNotValidExpectation?.fulfill()
+    }
+}
+
+// MARK: - NativeAdEventDelegate
+
+extension NativeInAppNativeTest: NativeAdEventDelegate {
+    func adDidExpire(ad: NativeAd) {
+        self.adExpiredAPIForNativeAd?.fulfill()
+    }
+    
+    func adWasClicked(ad: NativeAd) {
+        self.adDidClickAPIForNativeAd?.fulfill()
+    }
+    
+    func adDidLogImpression(ad: NativeAd) {
+        self.adDidLogImpressionAPIForNativeAd?.fulfill()
+    }
+}
+
+// MARK: - Native Helpers
+
+extension NativeInAppNativeTest {
     func createNativeInAppView(){
         let adNib = UINib(nibName: "NativeAdView", bundle: Bundle(for: type(of: self)))
         let array = adNib.instantiate(withOwner: self, options: nil)
@@ -259,7 +253,6 @@ class NativeInAppNativeTest: XCTestCase, NativeAdDelegate, NativeAdEventDelegate
     }
     
     func loadNativeAssets(){
-        
         let image = NativeAssetImage(minimumWidth: 200, minimumHeight: 200, required: true)
         image.type = ImageAsset.Main
         
@@ -273,16 +266,16 @@ class NativeInAppNativeTest: XCTestCase, NativeAdDelegate, NativeAdEventDelegate
         let cta = NativeAssetData(type: DataAsset.ctatext, required: true)
         
         let sponsored = NativeAssetData(type: DataAsset.sponsored, required: true)
+    
+        let event1 = EventType.Impression
+        eventTrackers = NativeEventTracker(event: event1, methods: [EventTracking.Image,EventTracking.js])
         
-        nativeUnit = NativeRequest(configId: "25e17008-5081-4676-94d5-923ced4359d3", assets: [icon,title,image,body,cta,sponsored])
-        
+        nativeUnit = NativeRequest(configId: "25e17008-5081-4676-94d5-923ced4359d3",
+                                   assets: [icon,title,image,body,cta,sponsored],
+                                   eventTrackers: [eventTrackers])
         nativeUnit.context = ContextType.Social
         nativeUnit.placementType = PlacementType.FeedContent
         nativeUnit.contextSubType = ContextSubType.Social
-        
-        let event1 = EventType.Impression
-        eventTrackers = NativeEventTracker(event: event1, methods: [EventTracking.Image,EventTracking.js])
-        nativeUnit.eventtrackers = [eventTrackers]
     }
     
     func removePreviousAds() {
@@ -292,19 +285,13 @@ class NativeInAppNativeTest: XCTestCase, NativeAdDelegate, NativeAdEventDelegate
             nativeAdView!.removeFromSuperview()
             nativeAdView = nil
         }
+        
         if nativeAd != nil {
             nativeAd = nil
         }
     }
     
-    func registerNativeInAppView(){
-        nativeAd?.delegate = self
-        if  let nativeAdView = nativeAdView {
-            nativeAd?.registerView(view: nativeAdView, clickableViews: [nativeAdView.callToActionButton])
-        }
-    }
-    
-    //MARK: Rendering Prebid Native
+    // MARK: Rendering Prebid Native
     func renderNativeInAppAd() {
         nativeAdView?.titleLabel.text = nativeAd?.title
         nativeAdView?.bodyLabel.text = nativeAd?.text
@@ -331,195 +318,4 @@ class NativeInAppNativeTest: XCTestCase, NativeAdDelegate, NativeAdEventDelegate
         nativeAdView?.callToActionButton.setTitle(nativeAd?.callToAction, for: .normal)
         nativeAdView?.sponsoredLabel.text = nativeAd?.sponsoredBy
     }
-    
-    //MARK: NativeAdDelegate
-    func nativeAdLoaded(ad:NativeAd) {
-        CacheManager.shared.delegate = ad
-        nativeAd = ad
-        registerNativeInAppView()
-        renderNativeInAppAd()
-        self.nativeInAppAdLoadedExpectation?.fulfill()
-        if self.adDidClickAPIForNativeAd != nil {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0, execute: {
-                self.nativeAdView?.callToActionButton.sendActions(for: .touchUpInside)
-            })
-        }
-    }
-    
-    func nativeAdNotFound() {
-        self.nativeInAppAdNotFoundExpectation?.fulfill()
-    }
-    
-    func nativeAdNotValid() {
-        self.nativeInAppAdNotValidExpectation?.fulfill()
-    }
-    
-    //MARK: NativeAdEventDelegate
-    func adDidExpire(ad:NativeAd){
-        self.adExpiredAPIForNativeAd?.fulfill()
-    }
-    func adWasClicked(ad:NativeAd){
-        self.adDidClickAPIForNativeAd?.fulfill()
-    }
-    func adDidLogImpression(ad:NativeAd){
-        self.adDidLogImpressionAPIForNativeAd?.fulfill()
-    }
-
-    
-    // MARK: - Stubbing
-    func stubAppNexusRequestWithResponse(_ responseName: String?) {
-        let currentBundle = Bundle(for: TestUtils.PBHTTPStubbingManager.self)
-        let baseResponse = try? String(contentsOfFile: currentBundle.path(forResource: responseName, ofType: "json") ?? "", encoding: .utf8)
-        let requestStub = PBURLConnectionStub()
-        requestStub.requestURL = "https://prebid.adnxs.com/pbs/v1/openrtb2/auction"
-        requestStub.responseCode = 200
-        requestStub.responseBody = baseResponse
-        PBHTTPStubbingManager.shared().add(requestStub)
-    }
-    
-    func requestCompleted(_ notification: Notification?) {
-        let incomingRequest = notification?.userInfo![kPBHTTPStubURLProtocolRequest] as? URLRequest
-        let requestString = incomingRequest?.url?.absoluteString
-        let searchString = "https://prebid.adnxs.com/pbs/v1/openrtb2/auction"
-        if request == nil && requestString?.range(of: searchString) != nil {
-            request = notification!.userInfo![kPBHTTPStubURLProtocolRequest] as? URLRequest
-            jsonRequestBody = PBHTTPStubbingManager.jsonBodyOfURLRequest(asDictionary: request) as! [String: Any]
-        }
-    }
-    
 }
-
-
-extension UIWindow {
-    static var key: UIWindow? {
-        if #available(iOS 13, *) {
-            return UIApplication.shared.windows.first { $0.isKeyWindow }
-        } else {
-            return UIApplication.shared.keyWindow
-        }
-    }
-}
-
-extension Array {
-    public func toDictionary<Key: Hashable>(with selectKey: (Element) -> Key) -> [Key:Element] {
-        var dict = [Key:Element]()
-        for element in self {
-            dict[selectKey(element)] = element
-        }
-        return dict
-    }
-}
-extension String {
-    var unescaped: String {
-        let entities = ["\0", "\t", "\n", "\r", "\"", "\'", "\\", "\\\'", "\\\""]
-        var current = self
-        for entity in entities {
-            let descriptionCharacters = entity.debugDescription.dropFirst().dropLast()
-            let description = String(descriptionCharacters)
-            current = current.replacingOccurrences(of: description, with: entity)
-        }
-        return current
-    }
-}
-
-extension CacheManager {
-    func testSave(content: String) -> String?{
-        if content.isEmpty {
-            return nil
-        }else{
-            let cacheId = "Prebid_" + UUID().uuidString
-            self.savedValuesDict[cacheId] = content
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-                self.savedValuesDict.removeValue(forKey: cacheId)
-                self.delegate?.cacheExpired()
-            })
-            return cacheId
-        }
-    }
-}
-
-@objcMembers class MPNativeAdRequest: NSObject {
-    
-    var name: String!
-    private(set) var p_customTargeting: MPNativeAdRequestTargeting
-
-    var targeting: MPNativeAdRequestTargeting {
-
-        get {
-            return p_customTargeting
-        }
-
-        set {
-            self.p_customTargeting = newValue
-        }
-
-    }
-
-    override init() {
-        self.p_customTargeting = MPNativeAdRequestTargeting()
-    }
-}
-
-@objcMembers class MPNativeAdRequestTargeting: NSObject {
-    var name: String!
-    private(set) var p_customKeywords: String = ""
-
-    var keywords: String {
-
-        get {
-            return p_customKeywords
-        }
-
-        set {
-            self.p_customKeywords = newValue
-        }
-
-    }
-}
-
-@objcMembers class DFPNRequest: NSObject {
-    var name: String!
-    private(set) var p_customKeywords: [String: AnyObject]
-
-    var customTargeting: [String: AnyObject] {
-
-        get {
-            return p_customKeywords
-        }
-
-        set {
-            self.p_customKeywords = newValue
-        }
-
-    }
-
-    override init() {
-        self.p_customKeywords = [String: AnyObject]()
-    }
-}
-
-@objcMembers class MPNativeAd: NSObject {
-    
-    var name: String!
-    var p_customProperties: [String:AnyObject]
-
-    var properties:  [String:AnyObject] {
-
-        get {
-            return p_customProperties
-        }
-
-        set {
-            self.p_customProperties = newValue
-        }
-
-    }
-
-    override init() {
-        self.p_customProperties = [String:AnyObject]()
-        self.p_customProperties["isPrebid"] = 1 as AnyObject
-    }
-}
-
-class GADNativeCustomTemplateAd: UserDefaults {}
-

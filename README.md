@@ -2,11 +2,11 @@
 
 # Prebid Mobile iOS SDK
 
-Get started with Prebid Mobile by creating a Prebid Server account [here](http://prebid.org/prebid-mobile/prebid-mobile-pbs.html)
+To work with Prebid Mobile, you will need accesss to a Prebid Server. See [this page](http://prebid.org/prebid-mobile/prebid-mobile-pbs.html) for options.
 
 ## Use Cocoapods?
 
-Easily include the Prebid Mobile SDK for your priamy ad server in your Podfile/
+Easily include the Prebid Mobile SDK for your primary ad server in your Podfile/
 
 ```
 platform :ios, '11.0'
@@ -34,3 +34,13 @@ Run the test script to run unit tests and integration tests.
 ```
 ./scripts/testPrebidMobile.sh
 ```
+
+
+## Carthage
+
+`2.0.3` version is available to build PrebidMobile with Carthage. For that, please, put the following content to your `Cartfile`:
+
+```
+github "prebid/prebid-mobile-ios" == 2.0.3-carthage
+```
+Note that `PrebidMobileGAMEventHandlers`, `PrebidMobileAdMobAdapters`, `PrebidMobileMAXAdapters` are not available to build with Carthage.

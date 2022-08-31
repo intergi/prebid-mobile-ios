@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="4Oj-qG-uCu">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="4Oj-qG-uCu">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -34,7 +34,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="center" spacing="17" translatesAutoresizingMaskIntoConstraints="NO" id="Jeh-3U-EHA">
-                                <rect key="frame" x="20" y="160" width="335" height="359"/>
+                                <rect key="frame" x="20" y="160" width="335" height="453"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ze7-Xk-t60">
                                         <rect key="frame" x="118" y="0.0" width="99" height="30"/>
@@ -64,29 +64,43 @@
                                             <segue destination="i5n-eA-fbo" kind="show" id="oHg-3D-EQi"/>
                                         </connections>
                                     </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Z7r-Gi-8Q5">
+                                        <rect key="frame" x="84" y="188" width="167" height="30"/>
+                                        <state key="normal" title="Video Interstitial Vertical"/>
+                                        <connections>
+                                            <segue destination="i5n-eA-fbo" kind="show" id="CwJ-fb-iJU"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="URP-yW-CGr">
+                                        <rect key="frame" x="72.5" y="235" width="190" height="30"/>
+                                        <state key="normal" title="Video Interstitial Landscape"/>
+                                        <connections>
+                                            <segue destination="i5n-eA-fbo" kind="show" id="OZT-TT-btG"/>
+                                        </connections>
+                                    </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0gT-aH-qqc">
-                                        <rect key="frame" x="119" y="188" width="97" height="30"/>
+                                        <rect key="frame" x="119" y="282" width="97" height="30"/>
                                         <state key="normal" title="Banner Native"/>
                                         <connections>
                                             <segue destination="g7Y-o0-qeY" kind="show" id="Mld-S3-Yyw"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8ga-uv-oWc">
-                                        <rect key="frame" x="121.5" y="235" width="92" height="30"/>
+                                        <rect key="frame" x="121.5" y="329" width="92" height="30"/>
                                         <state key="normal" title="In App Native"/>
                                         <connections>
                                             <segue destination="GT4-HE-4pt" kind="show" id="Iim-i9-iFW"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HcD-14-DN2">
-                                        <rect key="frame" x="112.5" y="282" width="110" height="30"/>
+                                        <rect key="frame" x="112.5" y="376" width="110" height="30"/>
                                         <state key="normal" title="Rewarded video"/>
                                         <connections>
                                             <segue destination="DWf-Za-wca" kind="show" id="hwa-a9-gmn"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Xoo-vz-hax">
-                                        <rect key="frame" x="117" y="329" width="101" height="30"/>
+                                        <rect key="frame" x="117" y="423" width="101" height="30"/>
                                         <state key="normal" title="Instream video"/>
                                         <connections>
                                             <segue destination="fzy-BX-rP8" kind="show" id="6P0-Fz-hsw"/>
@@ -95,10 +109,13 @@
                                 </subviews>
                             </stackView>
                             <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="fwP-lp-368">
-                                <rect key="frame" x="100" y="69" width="175" height="32"/>
+                                <rect key="frame" x="20" y="69" width="335" height="32"/>
                                 <segments>
                                     <segment title="DFP"/>
                                     <segment title="MoPub"/>
+                                    <segment title="In-App"/>
+                                    <segment title="GAM + Rendering"/>
+                                    <segment title="MoPub + Rendering"/>
                                 </segments>
                                 <connections>
                                     <action selector="onAdServerSwidshed:" destination="BYZ-38-t0r" eventType="valueChanged" id="j2N-Nn-Vqk"/>
@@ -109,19 +126,24 @@
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="Jeh-3U-EHA" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="I5D-Bl-QZ5"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="fwP-lp-368" secondAttribute="trailing" constant="100" id="IjW-xZ-d3E"/>
                             <constraint firstItem="fwP-lp-368" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="25" id="TB7-Cg-dlk"/>
                             <constraint firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="TVT-40-hfI"/>
                             <constraint firstItem="Jeh-3U-EHA" firstAttribute="top" secondItem="fwP-lp-368" secondAttribute="bottom" constant="60" id="WkA-Ux-ytE"/>
+                            <constraint firstAttribute="trailing" secondItem="fwP-lp-368" secondAttribute="trailing" constant="20" id="h8d-Dz-EFS"/>
+                            <constraint firstItem="fwP-lp-368" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="u5u-MC-ShX"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Jeh-3U-EHA" secondAttribute="trailing" constant="20" id="ukx-1v-bCp"/>
-                            <constraint firstItem="fwP-lp-368" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="100" id="yte-Ky-7os"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="blE-VU-00S"/>
                     <connections>
                         <outlet property="adServerSegment" destination="fwP-lp-368" id="oHh-cj-Nkb"/>
+                        <outlet property="bannerNative" destination="0gT-aH-qqc" id="t2i-IV-0Ua"/>
                         <outlet property="bannerVideo" destination="2BF-DS-686" id="5Fb-nV-c6O"/>
+                        <outlet property="inAppNative" destination="8ga-uv-oWc" id="FdH-cu-eJ1"/>
+                        <outlet property="instreamVideo" destination="Xoo-vz-hax" id="P6W-qL-JZK"/>
                         <outlet property="interstitialVideo" destination="H9f-Yj-Von" id="6Af-yT-nRW"/>
+                        <outlet property="landscapeVideo" destination="URP-yW-CGr" id="vLT-FU-QF6"/>
+                        <outlet property="verticalVideo" destination="Z7r-Gi-8Q5" id="aQi-5n-hdr"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -169,7 +191,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RMV-Sg-y3F">
-                                <rect key="frame" x="37.5" y="54" width="300" height="559"/>
+                                <rect key="frame" x="2" y="54" width="371" height="559"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </view>
                         </subviews>
@@ -177,7 +199,8 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="RMV-Sg-y3F" firstAttribute="top" secondItem="QKV-Tv-nlJ" secondAttribute="top" constant="10" id="9cf-Fd-nx4"/>
-                            <constraint firstItem="RMV-Sg-y3F" firstAttribute="leading" secondItem="QKV-Tv-nlJ" secondAttribute="leading" constant="37.5" id="Ku5-Wf-cmr"/>
+                            <constraint firstItem="QKV-Tv-nlJ" firstAttribute="trailing" secondItem="RMV-Sg-y3F" secondAttribute="trailing" constant="2" id="BZR-Pa-z3F"/>
+                            <constraint firstItem="RMV-Sg-y3F" firstAttribute="leading" secondItem="QKV-Tv-nlJ" secondAttribute="leading" constant="2" id="fmP-ww-ZtN"/>
                             <constraint firstItem="RMV-Sg-y3F" firstAttribute="centerX" secondItem="Bh5-l7-3oV" secondAttribute="centerX" id="sUL-mH-7Wn"/>
                             <constraint firstItem="RMV-Sg-y3F" firstAttribute="centerY" secondItem="Bh5-l7-3oV" secondAttribute="centerY" id="uIa-ue-Ysy"/>
                         </constraints>
@@ -244,7 +267,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="V4N-fP-62I" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-710" y="844"/>
+            <point key="canvasLocation" x="-1054" y="860"/>
         </scene>
         <!--Rewarded Video Controller-->
         <scene sceneID="o2o-ve-AgX">
@@ -288,11 +311,11 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2ys-Rb-Auo">
-                                <rect key="frame" x="37.5" y="208.5" width="300" height="250"/>
+                                <rect key="frame" x="27.5" y="109" width="320" height="50"/>
                                 <color key="backgroundColor" red="0.0" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="250" id="ArZ-Oe-HhF"/>
-                                    <constraint firstAttribute="width" constant="300" id="pfp-f7-fLv"/>
+                                    <constraint firstAttribute="width" constant="320" id="7Uj-DM-UCE"/>
+                                    <constraint firstAttribute="height" constant="50" id="X0F-EH-K98"/>
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yQh-8P-TfB">
@@ -301,14 +324,20 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="f9u-XW-Qe5" userLabel="Toggle Refresh Button">
+                                <rect key="frame" x="143" y="179" width="89" height="30"/>
+                                <state key="normal" title="Stop Refresh"/>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="jGy-I6-dpO"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="2ys-Rb-Auo" firstAttribute="centerY" secondItem="TqC-IG-bhU" secondAttribute="centerY" id="3zT-Cn-57s"/>
+                            <constraint firstItem="f9u-XW-Qe5" firstAttribute="centerX" secondItem="TqC-IG-bhU" secondAttribute="centerX" id="1Gz-l1-HS4"/>
                             <constraint firstItem="jGy-I6-dpO" firstAttribute="trailing" secondItem="yQh-8P-TfB" secondAttribute="trailing" constant="10" id="AaQ-ZF-rfR"/>
                             <constraint firstItem="yQh-8P-TfB" firstAttribute="leading" secondItem="jGy-I6-dpO" secondAttribute="leading" constant="10" id="CFW-Vd-PXj"/>
+                            <constraint firstItem="2ys-Rb-Auo" firstAttribute="top" secondItem="yQh-8P-TfB" secondAttribute="bottom" constant="40" id="ftp-Di-Hs4"/>
                             <constraint firstItem="2ys-Rb-Auo" firstAttribute="centerX" secondItem="TqC-IG-bhU" secondAttribute="centerX" id="fzC-0m-Ss9"/>
+                            <constraint firstItem="f9u-XW-Qe5" firstAttribute="top" secondItem="2ys-Rb-Auo" secondAttribute="bottom" constant="20" id="mbV-ag-NGx"/>
                             <constraint firstItem="yQh-8P-TfB" firstAttribute="top" secondItem="jGy-I6-dpO" secondAttribute="top" constant="25" id="roO-2e-Lef"/>
                         </constraints>
                     </view>
@@ -316,6 +345,7 @@
                     <connections>
                         <outlet property="adServerLabel" destination="yQh-8P-TfB" id="G6P-NP-8aN"/>
                         <outlet property="appBannerView" destination="2ys-Rb-Auo" id="aZu-7F-8qc"/>
+                        <outlet property="toggleRefreshButton" destination="f9u-XW-Qe5" id="mjD-FA-zrt"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="y1z-cd-7BR" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -357,8 +387,8 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="kib-uu-Sx9"/>
-        <segue reference="kvU-2J-PSM"/>
+        <segue reference="6vM-Cs-bCE"/>
+        <segue reference="oHg-3D-EQi"/>
     </inferredMetricsTieBreakers>
     <resources>
         <systemColor name="systemBackgroundColor">

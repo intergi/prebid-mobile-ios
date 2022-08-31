@@ -40,6 +40,8 @@ public class Utils: NSObject {
     private let GAD_CUSTOM_NATIVE_AD = "GADCustomNativeAd"
     private let INNNER_HTML_SCRIPT = "document.body.innerHTML"
 
+    
+    @available(*, deprecated, message: "MoPub is not available anymore. Use Prebid MAX adapters instead.")
     @objc
     public func convertDictToMoPubKeywords(dict: Dictionary<String, String>) -> String {
         return dict.toString(entrySeparator: ",", keyValueSeparator: ":")
@@ -78,7 +80,7 @@ public class Utils: NSObject {
 
                     let commaString: String = ","
                     if (targetingKeywordsString != "") {
-                        var keywordsArray = targetingKeywordsString.components(separatedBy: ",")
+                        let keywordsArray = targetingKeywordsString.components(separatedBy: ",")
                         var i = 0
                         var newString: String = ""
                         while i < keywordsArray.count {
@@ -151,12 +153,12 @@ public class Utils: NSObject {
             let hasDFPMember = adObject.responds(to: NSSelectorFromString("setCustomTargeting:"))
             if (hasDFPMember) {
                 //check if the publisher has added any custom targeting. If so then merge the bid keywords to the same.
-                if (adObject.value(forKey: "customTargeting") != nil) {
+                if (adObject.value(forKey: "customTargeting") != nil) { 
                     var existingDict: [String: Any] = adObject.value(forKey: "customTargeting") as! [String: Any]
-                    existingDict.merge(dict: bidResponse.customKeywords)
+                    existingDict.merge(dict: bidResponse.targetingInfo ?? [:])
                     adObject.setValue( existingDict, forKey: "customTargeting")
                 } else {
-                    adObject.setValue( bidResponse.customKeywords, forKey: "customTargeting")
+                    adObject.setValue( bidResponse.targetingInfo, forKey: "customTargeting")
                 }
 
                 return
@@ -176,13 +178,15 @@ public class Utils: NSObject {
 
                 let commaString: String = ","
 
-                for (key, value) in bidResponse.customKeywords {
-                    if ( targetingKeywordsString == .EMPTY_String) {
-                        targetingKeywordsString = key + ":" + value
-                    } else {
-                        targetingKeywordsString += commaString + key + ":" + value
-                    }
+                if let targetingInfo = bidResponse.targetingInfo {
+                    for (key, value) in targetingInfo {
+                        if ( targetingKeywordsString == .EMPTY_String) {
+                            targetingKeywordsString = key + ":" + value
+                        } else {
+                            targetingKeywordsString += commaString + key + ":" + value
+                        }
 
+                    }
                 }
 
                 Log.info("MoPub targeting keys are \(targetingKeywordsString)")
@@ -209,13 +213,15 @@ public class Utils: NSObject {
 
                 let commaString: String = ","
 
-                for (key, value) in bidResponse.customKeywords {
-                    if ( targetingKeywordsString == .EMPTY_String) {
-                        targetingKeywordsString = key + ":" + value
-                    } else {
-                        targetingKeywordsString += commaString + key + ":" + value
-                    }
+                if let targetingInfo = bidResponse.targetingInfo {
+                    for (key, value) in targetingInfo {
+                        if ( targetingKeywordsString == .EMPTY_String) {
+                            targetingKeywordsString = key + ":" + value
+                        } else {
+                            targetingKeywordsString += commaString + key + ":" + value
+                        }
 
+                    }
                 }
 
                 Log.info("MoPub targeting keys are \(targetingKeywordsString)")
@@ -228,10 +234,11 @@ public class Utils: NSObject {
                 }
 
             }
-        } else if let dictContainer = adObject as? DictionaryContainer<String, String> {
-            dictContainer.dict = bidResponse.customKeywords
+        } else if let dictContainer = adObject as? DictionaryContainer<String, String>,
+                  let targetingInfo = bidResponse.targetingInfo {
+            dictContainer.dict = targetingInfo
         } else if let dict = adObject as? NSMutableDictionary {
-            dict.addEntries(from: bidResponse.customKeywords)
+            dict.addEntries(from: bidResponse.targetingInfo ?? [:])
         }
     }
 
@@ -252,7 +259,7 @@ public class Utils: NSObject {
     private func findNativeForDFPCustomTemplateAd(_ dfpCustomAd: AnyObject){
         let isPrebid = dfpCustomAd.string?(forKey: "isPrebid")
         if("1" == isPrebid) {
-            if let hb_cache_id_local = dfpCustomAd.string?(forKey: "hb_cache_id_local"), CacheManager.shared.isValid(cacheId: hb_cache_id_local)
+            if let hb_cache_id_local = dfpCustomAd.string?(forKey: PrebidLocalCacheIdKey), CacheManager.shared.isValid(cacheId: hb_cache_id_local)
             {
                 let ad = NativeAd.create(cacheId: hb_cache_id_local)
                 if (ad != nil) {
@@ -273,7 +280,7 @@ public class Utils: NSObject {
         let properties = mopubObject.value(forKey: "properties") as! Dictionary<String, AnyObject>
         let isPrebid = properties["isPrebid"] as? Bool
         if (isPrebid != nil && isPrebid!) {
-            if let hb_cache_id_local = properties["hb_cache_id_local"] as? String, CacheManager.shared.isValid(cacheId: hb_cache_id_local){
+            if let hb_cache_id_local = properties[PrebidLocalCacheIdKey] as? String, CacheManager.shared.isValid(cacheId: hb_cache_id_local){
                 let ad = NativeAd.create(cacheId: hb_cache_id_local)
                 if (ad != nil){
                     delegate?.nativeAdLoaded(ad: ad!)
@@ -374,7 +381,7 @@ public class Utils: NSObject {
         }
     }
 
-    func getStringFromDictionary(_ dic: [String:AnyObject]) -> String? {
+    func getStringFromDictionary(_ dic: [String: AnyObject]) -> String? {
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: dic, options: [])
             let text = String(data: jsonData, encoding: .utf8)
@@ -385,10 +392,10 @@ public class Utils: NSObject {
         return nil
     }
 
-    func getDictionaryFromString(_ text: String) -> [String:AnyObject]? {
+    func getDictionaryFromString(_ text: String) -> [String: Any]? {
         if let data = text.data(using: .utf8) {
             do {
-                let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
+                let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any]
                 return json
             } catch {
                 print(error.localizedDescription)
@@ -396,7 +403,27 @@ public class Utils: NSObject {
         }
         return nil
     }
+    
+    func getDictionary(from value: Any?) -> [String: Any]? {
+          guard let stringValue = value as? String else {
+              Log.error("Can't parse given value to string type")
+              return nil
+          }
 
+          guard let data = stringValue.data(using: .utf8) else {
+              Log.error("Can't parse given value to data type")
+              return nil
+          }
+
+          do {
+              let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+              return json
+          } catch {
+              Log.error(error.localizedDescription)
+          }
+
+          return nil
+      }
 }
 
 /**

@@ -17,31 +17,60 @@ import Foundation
 
 import UIKit
 
+enum IntegrationKind: String, CaseIterable {
+    
+    case originalGAM    = "GAM"
+    
+    case inApp          = "In-App"
+    case renderingGAM   = "GAM (R)"
+    case renderingAdMob = "AdMob (R)"
+    case renderingMAX   = "MAX (R)"
+    
+    case undefined      = "Undefined"
+}
+
 
 class IndexController: UIViewController {
+    
     @IBOutlet var adServerSegment: UISegmentedControl!
+    
     @IBOutlet var bannerVideo: UIButton!
     @IBOutlet var interstitialVideo: UIButton!
+    @IBOutlet weak var bannerNative: UIButton!
+    @IBOutlet weak var inAppNative: UIButton!
+    @IBOutlet weak var instreamVideo: UIButton!
+    
+    @IBOutlet weak var verticalVideo: UIButton!
+    @IBOutlet weak var landscapeVideo: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         self.title = "Prebid Demo"
+        
+        adServerSegment.removeAllSegments()
+        
+        UILabel.appearance(whenContainedInInstancesOf: [UISegmentedControl.self]).numberOfLines = 0
+        IntegrationKind
+            .allCases
+            .filter { $0 != .undefined }
+            .forEach {
+                adServerSegment.insertSegment(withTitle: $0.rawValue, at: adServerSegment.numberOfSegments, animated: false)
+        }
+        
+        adServerSegment.selectedSegmentIndex = IntegrationKind
+            .allCases
+            .firstIndex(of: .inApp) ?? 0
+        
+        updateCasesList(for: .inApp)
     }
     
     @IBAction func onAdServerSwidshed(_ sender: UISegmentedControl) {
         let index = sender.selectedSegmentIndex
         
-        switch index {
-        case 0:
-            bannerVideo.isHidden = false
-        case 1:
-            bannerVideo.isHidden = true
-            
-        default:
-            bannerVideo.isHidden = false
-        }
+        let integrationKind = IntegrationKind.allCases[index]
         
+        updateCasesList(for: integrationKind)
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -53,38 +82,58 @@ class IndexController: UIViewController {
            buttonText = text
         }
         
+        let integrationKind = IntegrationKind(rawValue: adServerName) ?? .undefined
+        
         switch segue.destination {
             
         case let vc as BannerController:
-            vc.adServerName = adServerName
+            vc.integrationKind = integrationKind
             
             if buttonText == "Banner Video" {
                 vc.bannerFormat = .vast
             }
             
         case let vc as InterstitialViewController:
-            vc.adServerName = adServerName
+            vc.integrationKind = integrationKind
             
-            if buttonText == "Interstitial Video" {
-                vc.bannerFormat = .vast
+            if buttonText.contains("Video") {
+                vc.adFormat = .vast
+            }
+            
+            if buttonText.contains("Vertical") {
+                vc.orientation = .vertical
+            } else if buttonText.contains("Landscape") {
+                vc.orientation = .landscape
             }
             
         case let vc as NativeViewController:
-            vc.adServerName = adServerName
+            vc.integrationKind = integrationKind
             
         case let vc as RewardedVideoController:
-            vc.adServerName = adServerName
-            
+            vc.integrationKind = integrationKind
+
         case let vc as NativeInAppViewController:
-            vc.adServerName = adServerName
+            vc.integrationKind = integrationKind
 
         case let vc as InstreamVideoViewController:
-            vc.adServerName = adServerName
+            vc.integrationKind = integrationKind
 
         default:
             print("wrong controller")
 
         }
     }
-
+    
+    func updateCasesList(for integrationKind: IntegrationKind) {
+        
+        let isRendering = integrationKind == .inApp ||
+                          integrationKind == .renderingGAM ||
+                          integrationKind == .renderingAdMob ||
+                          integrationKind == .renderingMAX
+                
+        bannerNative.isHidden   = isRendering
+        instreamVideo.isHidden  = isRendering
+        verticalVideo.isHidden  = integrationKind != .inApp
+        landscapeVideo.isHidden = integrationKind != .inApp
+    }
 }

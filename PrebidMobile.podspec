@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "PrebidMobile"
-  s.version      = "1.12.1"
+  s.version      = "2.0.3"
   s.summary      = "PrebidMobile is a lightweight framework that integrates directly with Prebid Server."
 
   s.description  = <<-DESC
@@ -27,24 +27,42 @@ Pod::Spec.new do |s|
     LICENSE
     }
 
-  s.author             = { "Prebid.org, Inc." => "info@prebid.org" }
-  s.platform     = :ios, "10.0"
-  s.swift_version = '5.0'
-  s.source       = { :git => "https://github.com/prebid/prebid-mobile-ios.git", :tag => "#{s.version}" }
-  s.xcconfig = {
-:LIBRARY_SEARCH_PATHS => '$(inherited)',
-:OTHER_CFLAGS => '$(inherited)',
-:OTHER_LDFLAGS => '$(inherited)',
-:HEADER_SEARCH_PATHS => '$(inherited)',
-:FRAMEWORK_SEARCH_PATHS => '$(inherited)'
-}
-  s.framework  = ['CoreTelephony', 'SystemConfiguration', 'UIKit', 'Foundation']
+  s.author                 = { "Prebid.org, Inc." => "info@prebid.org" }
+  s.platform     	   = :ios, "10.0"
+  s.swift_version 	   = '5.0'
+  s.source      	   = { :git => "https://github.com/prebid/prebid-mobile-ios.git", :tag => "#{s.version}" }
+  s.xcconfig 		   = { :LIBRARY_SEARCH_PATHS => '$(inherited)',
+			       :OTHER_CFLAGS => '$(inherited)',
+			       :OTHER_LDFLAGS => '$(inherited)',
+			       :HEADER_SEARCH_PATHS => '$(inherited)',
+			       :FRAMEWORK_SEARCH_PATHS => '$(inherited)'
+			     }
+  s.requires_arc = true
+
+  s.frameworks = [ 'UIKit', 
+                   'Foundation', 
+                   'MapKit', 
+                   'SafariServices', 
+                   'SystemConfiguration',
+                   'AVFoundation',
+                   'CoreGraphics',
+                   'CoreLocation',
+                   'CoreTelephony',
+                   'CoreMedia',
+                   'QuartzCore'
+                 ]
+  s.weak_frameworks  = [ 'AdSupport', 'StoreKit', 'WebKit' ]
+
+  s.module_map   = 'PrebidMobile/BuildFiles/PrebidMobile.modulemap'
 
   # Support previous intagration
   s.default_subspec = 'core'
 
   s.subspec 'core' do |core|
     core.source_files = 'PrebidMobile/**/*.{h,m,swift}'
+    
+    core.resources    = 'PrebidMobile/PrebidMobileRendering/Assets/**/*.{json,png,js,html,xib,xcassets}'
+    core.vendored_frameworks = 'Frameworks/OMSDK-Static_Prebidorg.xcframework'
   end
 
 end
