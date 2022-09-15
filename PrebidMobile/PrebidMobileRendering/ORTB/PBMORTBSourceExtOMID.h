@@ -21,6 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, copy, nullable) NSString *omidpn;
 @property (nonatomic, copy, nullable) NSString *omidpv;
+@property (nonatomic, copy, nullable) NSDictionary *schain;
 
 @end
 

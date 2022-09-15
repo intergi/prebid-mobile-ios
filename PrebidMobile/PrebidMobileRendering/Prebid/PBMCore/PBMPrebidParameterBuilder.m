@@ -94,6 +94,9 @@
     if (Targeting.shared.omidPartnerVersion) {
         extSource.omidpv = Targeting.shared.omidPartnerVersion;
     }
+    if (Targeting.shared.schain) {
+        extSource.schain = Targeting.shared.schain;
+    }
 
     bidRequest.source.extOMID = extSource;
 

@@ -33,6 +33,10 @@ public class Targeting: NSObject {
     
     public var omidPartnerVersion: String?
     
+    // MARK: - SChain
+    
+    public var schain: [String: Any]?
+    
     // MARK: - User Information
     
     /**

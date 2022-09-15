@@ -24,6 +24,7 @@
     }
     _omidpn = @"Prebid";
     _omidpv = [PBMFunctions omidVersion];
+    _schain = [NSMutableDictionary new];
     return self;
 }
 
@@ -31,6 +32,7 @@
     PBMMutableJsonDictionary *ret = [PBMMutableJsonDictionary new];
     ret[@"omidpn"] = self.omidpn;
     ret[@"omidpv"] = self.omidpv;
+    ret[@"schain"] = self.schain;
     return ret;
 }
 
@@ -40,6 +42,7 @@
     }
     _omidpn = jsonDictionary[@"omidpn"];
     _omidpv = jsonDictionary[@"omidpv"];
+    _schain = jsonDictionary[@"schain"];
     return self;
 }
 
